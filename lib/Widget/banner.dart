@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:recipie_app/Utils/constants.dart';
 
 class BannerToExplore extends StatelessWidget {
   const BannerToExplore({super.key});
-
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://www.allrecipes.com/'); // Replace with your desired URL
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -15,6 +23,14 @@ class BannerToExplore extends StatelessWidget {
       ),
       child: Stack(
         children: [
+          Positioned(
+            top: 0,
+            bottom: 0,
+            right: -20,
+            child: Image.network(
+              "https://i.postimg.cc/15gnLQJ6/food-recipe-app-removebg-preview-removebg-preview.png",
+            ),
+          ),
           Positioned(
             top: 32,
             left: 20,
@@ -39,7 +55,7 @@ class BannerToExplore extends StatelessWidget {
                     backgroundColor: Colors.white,
                     elevation: 0,
                   ),
-                  onPressed: () {},
+                  onPressed: _launchURL,
                   child: const Text(
                     "Explore",
                     style: TextStyle(
@@ -50,14 +66,6 @@ class BannerToExplore extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          Positioned(
-            top: 0,
-            bottom: 0,
-            right: -20,
-            child: Image.network(
-              "https://pngimg.com/d/chef_PNG190.png",
             ),
           ),
         ],

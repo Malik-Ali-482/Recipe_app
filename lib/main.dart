@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:recipie_app/Provider/favourite_provider.dart';
 import 'package:recipie_app/Provider/quantity.dart';
 import 'package:provider/provider.dart';
+import 'screens/auth_screen.dart';
 import 'screens/app_main_screen.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
