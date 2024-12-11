@@ -24,7 +24,7 @@ class QuantityProvider extends ChangeNotifier {
   }
 
   // decrease servings
-  void decreaseQuanity() {
+  void decreaseQuantity() {
     if (_currentNumber > 1) {
       _currentNumber--;
       notifyListeners();

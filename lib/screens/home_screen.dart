@@ -39,7 +39,6 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kbackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -90,10 +89,9 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             "View all",
                             style: TextStyle(
-                              color: kbannerColor,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -155,8 +153,8 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                       borderRadius: BorderRadius.circular(25),
                       color:
                       category == streamSnapshot.data!.docs[index]['name']
-                          ? kprimaryColor
-                          : Colors.white,
+                          ? cprimaryColor
+                          : cinvertedColor,
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -169,7 +167,7 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                         color:
                         category == streamSnapshot.data!.docs[index]['name']
                             ? Colors.white
-                            : Colors.grey.shade600,
+                            : Colors.black,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -194,11 +192,9 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
         decoration: InputDecoration(
           filled: true,
           prefixIcon: const Icon(Iconsax.search_normal),
-          fillColor: Colors.white,
           border: InputBorder.none,
           hintText: "Search any recipes",
-          hintStyle: const TextStyle(
-            color: Colors.grey,
+          hintStyle: TextStyle(
           ),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

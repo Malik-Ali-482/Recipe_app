@@ -5,11 +5,10 @@ import 'package:recipie_app/Utils/constants.dart';
 class BannerToExplore extends StatelessWidget {
   const BannerToExplore({super.key});
   Future<void> _launchURL() async {
-    final Uri url = Uri.parse('https://www.allrecipes.com/'); // Replace with your desired URL
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      throw 'Could not launch $url';
+    final Uri url = Uri.parse(
+        'https://www.allrecipes.com/recipes/'); // Replace with your desired URL
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
     }
   }
   @override
@@ -19,7 +18,7 @@ class BannerToExplore extends StatelessWidget {
       height: 170,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: kbannerColor,
+        color: cbannerColor,
       ),
       child: Stack(
         children: [

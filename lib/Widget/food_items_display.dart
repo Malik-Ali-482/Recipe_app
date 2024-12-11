@@ -23,6 +23,7 @@ class FoodItemsDisplay extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(right: 10),
+        height: 250,
         width: 230,
         child: Stack(
           children: [
@@ -95,7 +96,7 @@ class FoodItemsDisplay extends StatelessWidget {
               ],
             ),
             // for favorite button
-            // now let's whok on favorite button using provider
+            // now add favorite button using provider
             Positioned(
               top: 5,
               right: 5,

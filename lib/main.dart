@@ -3,29 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:recipie_app/Provider/favourite_provider.dart';
 import 'package:recipie_app/Provider/quantity.dart';
 import 'package:provider/provider.dart';
-import 'screens/auth_screen.dart';
 import 'screens/app_main_screen.dart';
+import 'package:recipie_app/Provider/theme_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+
+  runApp(MyApp());
 }
+
 // This widget is the root of your application.
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
   Widget build(BuildContext context) {
+    // Here we don't need to access ThemeProvider directly in MyApp
     return MultiProvider(
       providers: [
-        // for favorite provider
-        ChangeNotifierProvider(create: (_)=>FavoriteProvider()),
-        // for quantity provider
-        ChangeNotifierProvider(create: (_) => QuantityProvider()),
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()), // Favorite provider
+        ChangeNotifierProvider(create: (_) => QuantityProvider()), // Quantity provider
+        ChangeNotifierProvider(create: (_) => ThemeProvider()), // Theme provider
       ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AppMainScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: themeProvider.isDarkMode ? ThemeData.dark() : ThemeData.light(),
+            home: AppMainScreen(),
+          );
+        },
       ),
     );
   }

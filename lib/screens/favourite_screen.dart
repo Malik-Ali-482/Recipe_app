@@ -19,9 +19,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     final favoriteItems = provider.favorites;
 
     return Scaffold(
-      backgroundColor: kbackgroundColor,
       appBar: AppBar(
-        backgroundColor: kbackgroundColor,
         centerTitle: true,
         title: const Text(
           "Favorites",
@@ -68,7 +66,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecipeDetailScreen(
-                        documentSnapshot: favoriteItem, // Pass the correct parameter
+                        documentSnapshot: favoriteItem,
                       ),
                     ),
                   );
@@ -82,7 +80,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
                         ),
                         child: Row(
                           children: [
@@ -90,7 +87,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                               width: 100,
                               height: 80,
                               decoration: BoxDecoration(
-                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 image: DecorationImage(
                                   fit: BoxFit.cover,
@@ -114,38 +110,33 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 const SizedBox(height: 5),
                                 Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Iconsax.flash_1,
                                       size: 16,
-                                      color: Colors.grey,
                                     ),
                                     Text(
                                       "${favoriteItem['cal']} Cal",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
-                                        color: Colors.grey,
                                       ),
                                     ),
-                                    const Text(
+                                     Text(
                                       " · ",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.grey,
                                       ),
                                     ),
-                                    const Icon(
+                                    Icon(
                                       Iconsax.clock,
                                       size: 16,
-                                      color: Colors.grey,
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
                                       "${favoriteItem['time']} Min",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
-                                        color: Colors.grey,
                                       ),
                                     ),
                                   ],

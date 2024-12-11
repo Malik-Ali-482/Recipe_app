@@ -3,6 +3,7 @@ import 'package:recipie_app/Utils/constants.dart';
 import 'package:recipie_app/screens/favourite_screen.dart';
 import 'package:recipie_app/screens/home_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:recipie_app/screens/setting_screen.dart';
 
 class AppMainScreen extends StatefulWidget {
   const AppMainScreen({super.key});
@@ -16,10 +17,11 @@ class _AppMainScreenState extends State<AppMainScreen> {
   late final List<Widget> page;
   @override
   void initState() {
+
     page = [
       const  MyAppHomeScreen(),
       const FavoriteScreen(),
-      navBarPage(Iconsax.setting_21),
+      const SettingScreen(),
     ];
 
     super.initState();
@@ -28,17 +30,14 @@ class _AppMainScreenState extends State<AppMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         iconSize: 28,
         currentIndex: selectedIndex,
-        selectedItemColor: kprimaryColor,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: cprimaryColor,
+        unselectedItemColor: clessdetailColor,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(
-          color: kprimaryColor,
+        selectedLabelStyle: TextStyle(
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: const TextStyle(
@@ -80,7 +79,6 @@ class _AppMainScreenState extends State<AppMainScreen> {
       child: Icon(
         iconName,
         size: 100,
-        color: kprimaryColor,
       ),
     );
   }
