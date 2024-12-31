@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:recipie_app/Utils/constants.dart';
 import 'package:recipie_app/Widget/food_items_display.dart';
 import 'package:recipie_app/Widget/icon_button.dart';
 import 'package:recipie_app/screens/recipe_detail_screen.dart';
-import 'package:iconsax/iconsax.dart';
 
 class ViewAllItems extends StatefulWidget {
   const ViewAllItems({super.key});
@@ -55,9 +53,10 @@ class _ViewAllItemsState extends State<ViewAllItems> {
           ),
         ),
         const Spacer(),
-        MyIconButton(
-          icon: Iconsax.notification,
-          pressed: () {},
+        Image.asset(
+          'assets/icon/icon.png', // Path to your logo
+          height: 60, // Adjust size as needed
+          width: 60,
         ),
         const SizedBox(width: 15),
       ],
@@ -67,11 +66,9 @@ class _ViewAllItemsState extends State<ViewAllItems> {
   Widget _buildGridView(AsyncSnapshot<QuerySnapshot> streamSnapshot) {
     return GridView.builder(
       itemCount: streamSnapshot.data!.docs.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75, // Square cards
+        childAspectRatio: 0.60,
         crossAxisSpacing: 15, // Space between columns
         mainAxisSpacing: 15, // Space between rows
       ),
@@ -86,7 +83,6 @@ class _ViewAllItemsState extends State<ViewAllItems> {
   Widget _buildItemCard(DocumentSnapshot documentSnapshot) {
     return GestureDetector(
       onTap: () {
-        // Navigate to RecipeDetailScreen and pass the documentSnapshot data
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -95,9 +91,9 @@ class _ViewAllItemsState extends State<ViewAllItems> {
         );
       },
       child: Card(
-        elevation: 8, // Higher elevation for better shadow effect
+        elevation: 8,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16), // Round the corners for style
+          borderRadius: BorderRadius.circular(16),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -106,7 +102,6 @@ class _ViewAllItemsState extends State<ViewAllItems> {
             child: Column(
               children: [
                 Expanded(
-
                   child: FoodItemsDisplay(documentSnapshot: documentSnapshot),
                 ),
               ],

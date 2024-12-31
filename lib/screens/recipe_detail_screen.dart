@@ -8,6 +8,7 @@ import 'package:recipie_app/Utils/constants.dart';
 import 'package:recipie_app/Widget/quantity_increment_decrement.dart';
 import 'package:recipie_app/screens/instructions_screen.dart';
 import 'package:recipie_app/Provider/theme_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -34,26 +35,43 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = FavoriteProvider.of(context);
+    // First, check if the provider is initialized and has the necessary data
     final quantityProvider = Provider.of<QuantityProvider>(context);
 
+    // Avoid accessing the provider's values before initialization
+    if (!quantityProvider.isDataReady) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(), // Show loading indicator if data is not ready
+        ),
+      );
+    }
+
+    final provider = FavoriteProvider.of(context);
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
-          Hero(
-            tag: widget.documentSnapshot['img'],
-            child: Container(
+          Container(
+            height: MediaQuery.of(context).size.height / 2,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200, // Fallback color while loading
+            ),
+          ),
+          CachedNetworkImage(
+            imageUrl: widget.documentSnapshot['img'],
+            placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+            errorWidget: (context, url, error) => Center(child: Icon(Icons.error)),
+            imageBuilder: (context, imageProvider) => Container(
               height: MediaQuery.of(context).size.height / 2,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(widget.documentSnapshot['img']),
+                  image: imageProvider, // Use CachedNetworkImage's ImageProvider
                   fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
-          // Back button and notification
+      // Back button and notification
           Positioned(
             top: 40,
             left: 10,
@@ -63,11 +81,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               children: [
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.arrow_back_ios_new),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Iconsax.notification),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.black45,),
                 ),
               ],
             ),
@@ -215,7 +231,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 style: TextStyle(color: cprimaryColor),
                               ),
                               trailing: Text(
-                                "${quantityProvider.updateIngredientAmounts[index]} ${ingredient['type']}",
+                                "${quantityProvider.updateIngredientAmounts[index]} ${ingredient['type']}",  // this is the line of error
                                 style: TextStyle(color: cprimaryColor),
                               ),
                             );
@@ -228,13 +244,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             // Start Cooking Button
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: csecondaryColor,
+                                backgroundColor: cbannerColor,
                                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 60),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(25),
                                 ),
                               ),
                               onPressed: () {
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -247,23 +264,30 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               },
                               child: Text(
                                 "Start Cooking",
-                                style: TextStyle(fontSize: 18, color: isDarkMode ? Colors.white : Colors.black),
+                                style: TextStyle(fontSize: 18, color: Colors.white),
                               ),
                             ),
                             const SizedBox(width: 20), // Add some space between the buttons
                             // Favorite Button
-                            IconButton(
-                              onPressed: () {
-                                provider.toggleFavorite(widget.documentSnapshot);
-                              },
-                              icon: Icon(
-                                provider.isExist(widget.documentSnapshot)
-                                    ? Iconsax.heart5
-                                    : Iconsax.heart,
-                                color: provider.isExist(widget.documentSnapshot) ? Colors.red : Colors.black,
-                                size: 30,
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: cbackgroundColor, // Background color of the circle
                               ),
-                            ),
+                              child: IconButton(
+                                onPressed: () {
+                                  provider.toggleFavorite(widget.documentSnapshot);
+                                },
+                                icon: Icon(
+                                  provider.isExist(widget.documentSnapshot)
+                                      ? Iconsax.heart5
+                                      : Iconsax.heart,
+                                  color: provider.isExist(widget.documentSnapshot) ? Colors.red : Colors.black,
+                                  size: 30,
+                                ),
+                              ),
+                            )
+
                           ],
                         ),
                         const SizedBox(height: 20),

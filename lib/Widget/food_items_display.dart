@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:recipie_app/Provider/favourite_provider.dart';
 import 'package:recipie_app/screens/recipe_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FoodItemsDisplay extends StatelessWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -39,8 +40,8 @@ class FoodItemsDisplay extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: NetworkImage(
-                          documentSnapshot['img'], // image from firestore
+                        image: CachedNetworkImageProvider(
+                          documentSnapshot['img'], // Cached image from Firestore
                         ),
                       ),
                     ),

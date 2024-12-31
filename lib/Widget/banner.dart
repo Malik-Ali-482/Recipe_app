@@ -26,8 +26,8 @@ class BannerToExplore extends StatelessWidget {
             top: 0,
             bottom: 0,
             right: -20,
-            child: Image.network(
-              "https://i.postimg.cc/15gnLQJ6/food-recipe-app-removebg-preview-removebg-preview.png",
+            child: Image.asset(
+              "assets/banner_image.png",
             ),
           ),
           Positioned(

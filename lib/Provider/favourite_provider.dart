@@ -4,57 +4,72 @@ import 'package:provider/provider.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   List<String> _favoriteIds = [];
-
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? _userId; // Store the current user's ID
   List<String> get favorites => _favoriteIds;
 
-  FavoriteProvider() {
+  FavoriteProvider(String userId) {
+    _userId = userId;
     loadFavorites();
   }
-  // toggle favorites states
-  void toggleFavorite(DocumentSnapshot product) async {
-    String productId = product.id;
-    if (_favoriteIds.contains(productId)) {
-      _favoriteIds.remove(productId);
-      await _removeFavorite(productId); // remove from favorite
+
+  // Toggle favorite state for a specific meal
+  void toggleFavorite(DocumentSnapshot meal) async {
+    String mealId = meal.id;
+    if (_favoriteIds.contains(mealId)) {
+      _favoriteIds.remove(mealId);
+      await _removeFavorite(mealId);
     } else {
-      _favoriteIds.add(productId);
-      await _addFavorite(productId); // add to favorite
+      _favoriteIds.add(mealId);
+      await _addFavorite(mealId);
     }
     notifyListeners();
   }
 
-  // chek if a product is favorited
-  bool isExist(DocumentSnapshot prouct) {
-    return _favoriteIds.contains(prouct.id);
+  // Check if a meal is favorited
+  bool isExist(DocumentSnapshot meal) {
+    return _favoriteIds.contains(meal.id);
   }
 
-  // add favorites to firestore
-  Future<void> _addFavorite(String productId) async {
+  // Add a favorite to the user's subcollection in Firestore
+  Future<void> _addFavorite(String mealId) async {
+    if (_userId == null) return;
     try {
-      await _firestore.collection("userFavorite").doc(productId).set({
-        'isFavorite':
-        true, // create the userFavorite collection and add item as favorites inf firestore
-      });
+      await _firestore
+          .collection("users")
+          .doc(_userId)
+          .collection("favorites")
+          .doc(mealId)
+          .set({'isFavorite': true});
     } catch (e) {
       print(e.toString());
     }
   }
 
-  // Remove favorite from firestore
-  Future<void> _removeFavorite(String productId) async {
+  // Remove a favorite from the user's subcollection in Firestore
+  Future<void> _removeFavorite(String mealId) async {
+    if (_userId == null) return;
     try {
-      await _firestore.collection("userFavorite").doc(productId).delete();
+      await _firestore
+          .collection("users")
+          .doc(_userId)
+          .collection("favorites")
+          .doc(mealId)
+          .delete();
     } catch (e) {
       print(e.toString());
     }
   }
 
-  // load favories from firestore (store favorite or not)
+  // Load favorites from the user's subcollection in Firestore
   Future<void> loadFavorites() async {
+    if (_userId == null) return;
     try {
-      QuerySnapshot snapshot =
-      await _firestore.collection("userFavorite").get();
+      QuerySnapshot snapshot = await _firestore
+          .collection("users")
+          .doc(_userId)
+          .collection("favorites")
+          .get();
       _favoriteIds = snapshot.docs.map((doc) => doc.id).toList();
     } catch (e) {
       print(e.toString());

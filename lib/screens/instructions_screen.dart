@@ -3,6 +3,7 @@ import 'package:recipie_app/screens/app_main_screen.dart';
 import 'package:recipie_app/Utils/constants.dart';
 import 'package:recipie_app/Provider/theme_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:recipie_app/Utils/notification_helper.dart';
 
 class CookingInstructionsScreen extends StatelessWidget {
   final List<dynamic> instructions;
@@ -16,6 +17,7 @@ class CookingInstructionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(recipeName),
@@ -108,13 +110,15 @@ class CookingInstructionsScreen extends StatelessWidget {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: csecondaryColor,
+                    backgroundColor: cbannerColor,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                   onPressed: () {
+                    NotificationHelper().showRateAppNotification();
+                    NotificationHelper().scheduleDishReminderNotification();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -124,7 +128,7 @@ class CookingInstructionsScreen extends StatelessWidget {
                   },
                   child: Text(
                     "Finish",
-                    style: TextStyle(fontSize: 18, color: isDarkMode ? Colors.white : Colors.black),
+                    style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
               ],

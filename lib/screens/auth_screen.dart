@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'app_main_screen.dart'; // Import the home screen
+import 'package:recipie_app/Utils/constants.dart';
+import 'app_main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -114,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     children: [
                       Text(
                         isLogin ? "Login" : "Sign Up",
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 16),
                       if (!isLogin) // Show username field only for signup
@@ -122,6 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           children: [
                             TextField(
                               controller: _usernameController,
+                              style: const TextStyle(color: Colors.black),
                               decoration: const InputDecoration(
                                 labelText: "Username",
                                 border: OutlineInputBorder(),
@@ -132,6 +134,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       TextField(
                         controller: _emailController,
+                        style: const TextStyle(color: Colors.black),
                         decoration: const InputDecoration(
                           labelText: "Email",
                           border: OutlineInputBorder(),
@@ -141,6 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: true,
+                        style: const TextStyle(color: Colors.black),
                         decoration: const InputDecoration(
                           labelText: "Password",
                           border: OutlineInputBorder(),
@@ -150,8 +154,17 @@ class _AuthScreenState extends State<AuthScreen> {
                       isLoading
                           ? const CircularProgressIndicator() // Show loader during authentication
                           : ElevatedButton(
+
                         onPressed: authenticate,
-                        child: Text(isLogin ? "Login" : "Sign Up"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cbannerColor, // Set the button color to blue
+                        ),
+                        child: Text(
+                          isLogin ? "Login" : "Sign Up",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {

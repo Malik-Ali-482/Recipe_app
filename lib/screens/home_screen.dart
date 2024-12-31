@@ -3,9 +3,9 @@ import 'package:recipie_app/Utils/constants.dart';
 import 'package:recipie_app/screens/view_all_items.dart';
 import 'package:recipie_app/Widget/banner.dart';
 import 'package:recipie_app/Widget/food_items_display.dart';
-import 'package:recipie_app/Widget/icon_button.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MyAppHomeScreen extends StatefulWidget {
   const MyAppHomeScreen({super.key});
@@ -15,26 +15,32 @@ class MyAppHomeScreen extends StatefulWidget {
 }
 
 class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
+  final now = DateTime.now();
   String category = "All";
-  // for category
+  String searchQuery = "";  // To hold the search input
+  final TextEditingController _searchController = TextEditingController();  // Controller for the search bar
   final CollectionReference categoriesItems =
   FirebaseFirestore.instance.collection("App-Category");
-  // for all itesm display
-  Query get fileteredRecipes =>
-      FirebaseFirestore.instance.collection("recipe_data").where(
-        'type',
-        isEqualTo: category,
-      );
+
+  // Query to fetch recipes, applying search filter if query is not empty
+  Query get filteredRecipes {
+    return FirebaseFirestore.instance
+        .collection("recipe_data")
+        .where('name', isGreaterThanOrEqualTo: searchQuery)
+        .where('name', isLessThanOrEqualTo: '$searchQuery\uf8ff');
+  }
+
   Query get allRecipes =>
       FirebaseFirestore.instance.collection("recipe_data");
+
   Query get selectedRecipes =>
       category == "All"
-          ? FirebaseFirestore.instance.collection("recipe_data")
-          : FirebaseFirestore.instance.collection("recipe_data").where(
-        'type',
-        isEqualTo: category,
-      );
-
+          ? (searchQuery.isEmpty ? allRecipes : filteredRecipes)
+          : (searchQuery.isEmpty
+          ? FirebaseFirestore.instance
+          .collection("recipe_data")
+          .where('type', isEqualTo: category)
+          : filteredRecipes.where('type', isEqualTo: category));
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +57,27 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     headerPart(),
+                    Container(
+                      padding: const EdgeInsets.all(10), // Adds inner padding
+                      margin: const EdgeInsets.symmetric(vertical: 10), // Adds space around the container
+                      decoration: BoxDecoration(
+                        color: cbannerColor.withOpacity(0.2), // Light background color
+                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                      ),
+                      child: Text(
+                        now.hour >= 5 && now.hour < 12
+                            ? "What do you want for breakfast?"
+                            : (now.hour >= 12 && now.hour < 17
+                            ? "What do you want for Lunch?"
+                            : "What do you want for Dinner?"),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: cbannerColor, // Text color
+                        ),
+                      ),
+                    ),
+
                     mySearchBar(),
                     // for banner
                     const BannerToExplore(),
@@ -119,7 +146,6 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                       ),
                     );
                   }
-                  // it means if snapshot has date then show the date otherwise show the progress bar
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -164,8 +190,8 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                     child: Text(
                       streamSnapshot.data!.docs[index]['name'],
                       style: TextStyle(
-                        color:
-                        category == streamSnapshot.data!.docs[index]['name']
+                        color: category == streamSnapshot.data!.docs[index]
+                        ['name']
                             ? Colors.white
                             : Colors.black,
                         fontWeight: FontWeight.w600,
@@ -177,7 +203,6 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
             ),
           );
         }
-        // it means if snapshot has date then show the date otherwise show the progress bar
         return const Center(
           child: CircularProgressIndicator(),
         );
@@ -189,13 +214,18 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 22),
       child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value; // Update the search query when the user types
+          });
+        },
         decoration: InputDecoration(
           filled: true,
           prefixIcon: const Icon(Iconsax.search_normal),
           border: InputBorder.none,
           hintText: "Search any recipes",
-          hintStyle: TextStyle(
-          ),
+          hintStyle: TextStyle(),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none),
@@ -210,20 +240,93 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   Row headerPart() {
     return Row(
       children: [
-        const Text(
-          "What do you want\nto cook today?",
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            height: 1,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: GreetingWidget(),
           ),
         ),
-        const Spacer(),
-        MyIconButton(
-          icon: Iconsax.notification,
-          pressed: () {},
+        Image.asset(
+          'assets/icon/icon.png', // Path to your logo
+          height: 60, // Adjust size as needed
+          width: 60,
         ),
       ],
+    );
+  }
+
+}
+class GreetingWidget extends StatelessWidget {
+  const GreetingWidget({super.key});
+
+  // Helper method to fetch time-based greeting
+  String _getTimeBasedGreeting() {
+    final now = DateTime.now();
+    if (now.hour >= 5 && now.hour < 12) {
+      return "Good Morning!";
+    } else if (now.hour >= 12 && now.hour < 17) {
+      return "Good Afternoon!";
+    } else {
+      return "Good Evening!";
+    }
+  }
+
+  // Helper method to fetch meal suggestion based on the time of day
+
+
+  @override
+  Widget build(BuildContext context) {
+    // Retrieve current user's ID
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId == null) {
+      return const Center(
+        child: Text(
+          "Welcome! Please log in to personalize your experience.",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      );
+    }
+
+    // Firestore reference for the user's document
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: userDoc.get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              "Error loading user data. Please try again later.",
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        }
+
+        // Extract username or show default if not available
+        final username = snapshot.data?.get('username') ?? 'User';
+        final greeting = _getTimeBasedGreeting();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "$greeting\n$username",
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.orangeAccent,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:recipie_app/Provider/favourite_provider.dart';
-import 'package:recipie_app/Utils/constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:recipie_app/screens/recipe_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -90,7 +90,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 image: DecorationImage(
                                   fit: BoxFit.cover,
-                                  image: NetworkImage(
+                                  image: CachedNetworkImageProvider(
                                     favoriteItem['img'],
                                   ),
                                 ),

@@ -4,11 +4,18 @@ class QuantityProvider extends ChangeNotifier {
   int _currentNumber = 1;
   List<double> _baseIngredientAmounts = [];
   int get currentNumber => _currentNumber;
-  // Set initial ingredient amounts
+
+  bool isDataReady = false; // Flag to indicate when the data is fully ready
+
+  List<double> get baseIngredientAmounts => _baseIngredientAmounts;
+
+  // Method to set base ingredient amounts and mark data as ready
   void setBaseIngredientAmounts(List<double> amounts) {
-    _baseIngredientAmounts = amounts;
-    notifyListeners();
+  _baseIngredientAmounts = amounts;
+  isDataReady = true;
+  notifyListeners();
   }
+
 
   // Update ingredient amounts based on the quantity
   List<String> get updateIngredientAmounts {
