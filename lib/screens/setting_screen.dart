@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recipie_app/screens/auth_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:recipie_app/screens/miscellenous_screen.dart';
 import 'package:recipie_app/Utils/notification_helper.dart';
 import 'package:recipie_app/Provider/notification_provider.dart';
@@ -24,22 +23,6 @@ class _SettingScreenState extends State<SettingScreen> {
     notificationHelper = NotificationHelper();
   }
 
-  void _toggleNotifications(bool value) async {
-    setState(() {
-      areNotificationsEnabled = value;
-    });
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('notificationsEnabled', value);
-
-    if (value) {
-      notificationHelper.showImmediateNotification(
-        title: "Notifications Enabled",
-        body: "You will now receive notifications for app ratings.",
-      );
-    } else {
-      notificationHelper.cancelAllNotifications();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
