@@ -106,7 +106,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 backgroundColor: Colors.white,
                 child: InkWell(
                   onTap: () {
-                    provider.toggleFavorite(documentSnapshot);
+                      provider.toggleFavorite(documentSnapshot);
                   },
                   child: Icon(
                     provider.isExist(documentSnapshot)

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:recipie_app/Utils/constants.dart';
 import 'app_main_screen.dart';
+import 'package:recipie_app/Provider/favourite_provider.dart';
+import 'package:provider/provider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -12,56 +13,94 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  bool isLogin = true; // Toggle between Login and Signup
-  bool isLoading = false; // Loading state
+  bool isLogin = true;
+  bool isLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _usernameController = TextEditingController(); // For username during signup
+  final _usernameController = TextEditingController();
+
+  String passwordError = '';
+
+  List<String> validatePassword(String password) {
+    List<String> errors = [];
+    if (!RegExp(r'(?=.*[A-Z])').hasMatch(password)) {
+      errors.add('Password must contain at least one uppercase letter.\n');
+    }
+    if (!RegExp(r'(?=.*[a-z])').hasMatch(password)) {
+      errors.add('Password must contain at least one lowercase letter.\n');
+    }
+    if (!RegExp(r'(?=.*\d)').hasMatch(password)) {
+      errors.add('Password must contain at least one digit.\n');
+    }
+    if (!RegExp(r'(?=.*[!@#$%^&*])').hasMatch(password)) {
+      errors.add('Password must contain at least one special character.\n');
+    }
+    if (password.length < 8) {
+      errors.add('Password must be at least 8 characters long.\n');
+    }
+    return errors;
+  }
 
   Future<void> authenticate() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final username = _usernameController.text.trim();
 
+    List<String> passwordErrors = validatePassword(password);
+    if (passwordErrors.isNotEmpty) {
+      setState(() {
+        passwordError = passwordErrors.join('\n');
+      });
+      return;
+    } else {
+      setState(() {
+        passwordError = '';
+      });
+    }
+
     if (email.isEmpty || password.isEmpty || (!isLogin && username.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      setState(() {
+        passwordError = 'Please fill all fields.';
+      });
       return;
     }
 
     setState(() {
-      isLoading = true; // Start loading
+      isLoading = true;
     });
 
     try {
       if (isLogin) {
-        // Login
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
         final user = userCredential.user;
-        final displayName = user?.displayName ?? "User";
+        if (user != null) {
+          final favoriteProvider =
+          Provider.of<FavoriteProvider>(context, listen: false);
+          favoriteProvider.setUserId(user.uid); // Set user ID dynamically
 
-        // Pass email to MyAppHomeScreen after successful login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AppMainScreen(),
-          ),
-        );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AppMainScreen(),
+            ),
+          );
+        }
       } else {
-        // Signup
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
-        await userCredential.user?.updateDisplayName(username); // Set username
+        await userCredential.user?.updateDisplayName(username);
 
-        // Add user data to Firestore (optional, you can modify as needed)
-        // Assuming Firestore setup exists and you want to store the username
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user?.uid)
+            .set({
           'email': email,
           'username': username,
         });
@@ -71,17 +110,19 @@ class _AuthScreenState extends State<AuthScreen> {
         );
 
         setState(() {
-          isLogin = true; // Switch to login
+          isLogin = true;
         });
       }
     } catch (e) {
-      final errorMessage = e is FirebaseAuthException ? e.message ?? "An error occurred" : "An unexpected error occurred";
+      final errorMessage = e is FirebaseAuthException
+          ? e.message ?? "An error occurred"
+          : "An unexpected error occurred";
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
     } finally {
       setState(() {
-        isLoading = false; // Stop loading
+        isLoading = false;
       });
     }
   }
@@ -91,7 +132,6 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -118,12 +158,11 @@ class _AuthScreenState extends State<AuthScreen> {
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 16),
-                      if (!isLogin) // Show username field only for signup
+                      if (!isLogin)
                         Column(
                           children: [
                             TextField(
                               controller: _usernameController,
-                              style: const TextStyle(color: Colors.black),
                               decoration: const InputDecoration(
                                 labelText: "Username",
                                 border: OutlineInputBorder(),
@@ -134,7 +173,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       TextField(
                         controller: _emailController,
-                        style: const TextStyle(color: Colors.black),
                         decoration: const InputDecoration(
                           labelText: "Email",
                           border: OutlineInputBorder(),
@@ -144,27 +182,18 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: true,
-                        style: const TextStyle(color: Colors.black),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Password",
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          errorText: passwordError.isNotEmpty ? passwordError : null,
                         ),
                       ),
                       const SizedBox(height: 16),
                       isLoading
-                          ? const CircularProgressIndicator() // Show loader during authentication
+                          ? const CircularProgressIndicator()
                           : ElevatedButton(
-
                         onPressed: authenticate,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cbannerColor, // Set the button color to blue
-                        ),
-                        child: Text(
-                          isLogin ? "Login" : "Sign Up",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: Text(isLogin ? "Login" : "Sign Up"),
                       ),
                       TextButton(
                         onPressed: () {

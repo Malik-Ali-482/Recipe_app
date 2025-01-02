@@ -257,6 +257,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => CookingInstructionsScreen(
                                       instructions: widget.documentSnapshot['instructions'],
+                                      recipeData: widget.documentSnapshot,
                                       recipeName: widget.documentSnapshot['name'],
                                     ),
                                   ),

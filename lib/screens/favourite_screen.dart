@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recipie_app/Provider/favourite_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:recipie_app/screens/recipe_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart'; // Import provider package
 
 class FavoriteScreen extends StatefulWidget {
+
   const FavoriteScreen({super.key});
 
   @override
@@ -15,7 +18,11 @@ class FavoriteScreen extends StatefulWidget {
 class _FavoriteScreenState extends State<FavoriteScreen> {
   @override
   Widget build(BuildContext context) {
-    final provider = FavoriteProvider.of(context);
+    // Safely retrieve the userId, handle the case where it might be null
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    // Pass the userId to FavoriteProvider if it's not null
+    final provider = Provider.of<FavoriteProvider>(context);
     final favoriteItems = provider.favorites;
 
     return Scaffold(
@@ -121,7 +128,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                         fontSize: 12,
                                       ),
                                     ),
-                                     Text(
+                                    Text(
                                       " · ",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
@@ -152,9 +159,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       right: 35,
                       child: GestureDetector(
                         onTap: () {
-                          setState(() {
-                            provider.toggleFavorite(favoriteItem);
-                          });
+                          provider.toggleFavorite(favoriteItem);
                         },
                         child: const Icon(
                           Icons.delete,

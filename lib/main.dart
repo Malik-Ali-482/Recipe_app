@@ -5,7 +5,6 @@ import 'package:recipie_app/Provider/quantity.dart';
 import 'package:provider/provider.dart';
 import 'screens/auth_gate.dart';
 import 'package:recipie_app/Provider/theme_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recipie_app/Provider/notification_provider.dart';
 
 void main() async {
@@ -21,12 +20,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? "";
-    // Here we don't need to access ThemeProvider directly in MyApp
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
-        ChangeNotifierProvider(create: (_) => FavoriteProvider(userId)), // Favorite provider
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()), // Favorite provider
         ChangeNotifierProvider(create: (_) => QuantityProvider()), // Quantity provider
         ChangeNotifierProvider(create: (_) => ThemeProvider()), // Theme provider
       ],
