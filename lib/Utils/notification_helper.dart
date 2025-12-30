@@ -85,14 +85,12 @@ class NotificationHelper {
 
       // Schedule notification for 7 hours later
       await _notification.zonedSchedule(
-        1, // Notification ID
-        'Feeling hungry?', // Title
-        "Let's make another dish!", // Body
+        1,
+        'Feeling hungry?',
+        "Let's make another dish!",
         tz.TZDateTime.now(tz.local).add(const Duration(hours: 7)),
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
       );
     }
   }

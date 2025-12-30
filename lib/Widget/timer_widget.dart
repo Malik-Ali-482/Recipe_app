@@ -22,8 +22,9 @@ class _TimerWidgetState extends State<TimerWidget> {
   @override
   void initState() {
     super.initState();
-    totalTimeInSeconds = widget.minutes * 60;
-    remainingTime = totalTimeInSeconds;
+    // Ensure totalTimeInSeconds is at least 1 to avoid Division by Zero (NaN)
+    totalTimeInSeconds = (widget.minutes > 0 ? widget.minutes : 1) * 60;
+    remainingTime = widget.minutes * 60;
     _audioPlayer = AudioPlayer();
     _startTimer();
   }
@@ -31,9 +32,11 @@ class _TimerWidgetState extends State<TimerWidget> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingTime > 0) {
-        setState(() {
-          remainingTime--;
-        });
+        if (mounted) {
+          setState(() {
+            remainingTime--;
+          });
+        }
       } else {
         _timer.cancel();
         _playBeep();
@@ -43,12 +46,16 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   void _playBeep() async {
-    // Play a beep sound when the timer hits zero
-    await _audioPlayer.play(AssetSource('assets/beep.mp3')); // Ensure you have a beep.mp3 in your assets
+    try {
+      // audioplayers 6.x expects the path relative to the assets folder.
+      // If your file is at 'assets/beep.mp3', just pass 'beep.mp3'.
+      await _audioPlayer.play(AssetSource('beep.mp3'));
+    } catch (e) {
+      debugPrint("Error playing audio: $e");
+    }
   }
 
   void _showNotification() async {
-    // Send a notification when the timer ends
     await _notificationHelper.showImmediateNotification(
       title: 'Time is up!',
       body: 'Your timer has finished.',
@@ -57,50 +64,45 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate minutes and seconds from the remaining time
     int minutesLeft = remainingTime ~/ 60;
     int secondsLeft = remainingTime % 60;
 
-    // Calculate the progress for the circular indicator
-    double progress = remainingTime / totalTimeInSeconds;
+    // Safely calculate progress to avoid NaN/Infinity
+    double progress = totalTimeInSeconds > 0 ? remainingTime / totalTimeInSeconds : 0.0;
+    // Clamp between 0 and 1 just in case
+    progress = progress.clamp(0.0, 1.0);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Display remaining time in "MM:SS" format
         Text(
           '$minutesLeft:${secondsLeft.toString().padLeft(2, '0')}',
           style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
-
-        // Analog clock-like circular representation
         Stack(
           alignment: Alignment.center,
           children: [
-            // Background circle
             SizedBox(
               width: 150,
               height: 150,
               child: CircularProgressIndicator(
-                value: 1, // Full circle
+                value: 1, 
                 strokeWidth: 10,
                 color: Colors.grey[300],
               ),
             ),
-            // Foreground circle with remaining time shaded in green
             SizedBox(
               width: 150,
               height: 150,
               child: CircularProgressIndicator(
-                value: progress, // Green shaded area showing remaining time
+                value: progress, 
                 strokeWidth: 10,
                 color: Colors.green,
               ),
             ),
-            // Clock hands as a visual indicator of passage of time
-            Positioned(
+            const Positioned(
               top: 10,
               child: Text(
                 "Time left",
@@ -116,7 +118,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   @override
   void dispose() {
     _timer.cancel();
-    _audioPlayer.dispose(); // Dispose the audio player to prevent memory leaks
+    _audioPlayer.dispose();
     super.dispose();
   }
 }

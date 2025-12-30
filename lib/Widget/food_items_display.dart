@@ -12,6 +12,21 @@ class FoodItemsDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
+
+    // Safely check if the document exists and has data
+    if (!documentSnapshot.exists || documentSnapshot.data() == null) {
+      return const SizedBox.shrink(); // Return nothing if doc doesn't exist
+    }
+
+    final Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+
+    // Safely get fields with fallbacks
+    final String name = data['name'] ?? 'Unknown Recipe';
+    final String rawImg = data['img'] ?? '';
+    final String imageUrl = rawImg.trim();
+    final String cal = data['cal']?.toString() ?? '0';
+    final String time = data['time']?.toString() ?? '0';
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -32,24 +47,30 @@ class FoodItemsDisplay extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Hero(
-                  tag: documentSnapshot['img'],
+                  tag: imageUrl,
                   child: Container(
                     width: double.infinity,
                     height: 160,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: CachedNetworkImageProvider(
-                          documentSnapshot['img'], // Cached image from Firestore
-                        ),
-                      ),
+                      image: imageUrl.isNotEmpty
+                          ? DecorationImage(
+                              fit: BoxFit.cover,
+                              image: CachedNetworkImageProvider(imageUrl),
+                            )
+                          : null,
+                      color: Colors.grey[300],
                     ),
+                    child: imageUrl.isEmpty
+                        ? const Icon(Icons.image_not_supported)
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  documentSnapshot['name'],
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -64,7 +85,7 @@ class FoodItemsDisplay extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     Text(
-                      "${documentSnapshot['cal']} Cal",
+                      "$cal Cal",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -85,7 +106,7 @@ class FoodItemsDisplay extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      "${documentSnapshot['time']} Min",
+                      "$time Min",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -97,7 +118,6 @@ class FoodItemsDisplay extends StatelessWidget {
               ],
             ),
             // for favorite button
-            // now add favorite button using provider
             Positioned(
               top: 5,
               right: 5,
@@ -120,7 +140,6 @@ class FoodItemsDisplay extends StatelessWidget {
                 ),
               ),
             ),
-            // lets design a favorite screen
           ],
         ),
       ),
